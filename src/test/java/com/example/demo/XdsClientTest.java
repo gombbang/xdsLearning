@@ -58,14 +58,14 @@ public class XdsClientTest {
 
         String typeUrl = XdsTypeUrl.EDS.getTypeUrl();  // EDS
 
-        XdsClient._State state = xdsClient.sendDiscoveryRequest(XdsTypeUrl.CDS.getTypeUrl());
-         StreamObserver<DiscoveryRequest> requestStreamObserverCDS = state.streamObserverRequest;
+        State state = xdsClient.sendDiscoveryRequest(XdsTypeUrl.CDS.getTypeUrl());
+         StreamObserver<DiscoveryRequest> requestStreamObserverCDS = state.getStreamObserverRequest();
 
 
         while(true) {
             Thread.sleep(5000);
             System.out.println("Test");
-             state.streamObserverRequest.onNext(state.request);
+             state.getStreamObserverRequest().onNext(state.getRequest());
         }
         // connection이 일부가 깨지거나
         // server에 connection이 모두 깨질 때
@@ -80,15 +80,11 @@ public class XdsClientTest {
                 .usePlaintext()
                 .build();
 
-        XdsReader.runXds(xdsClient,XdsTypeUrl.LDS);
-        XdsClient xdsClient1 = new XdsClient(channel);
+        xdsClient.runXds(XdsTypeUrl.LDS);
+        xdsClient.runXds(XdsTypeUrl.RDS);
+        xdsClient.runXds(XdsTypeUrl.CDS);
+        xdsClient.runXds(XdsTypeUrl.EDS);
 
-        XdsReader.runXds(xdsClient1,XdsTypeUrl.RDS);
-        XdsClient xdsClient2 = new XdsClient(channel);
-        XdsReader.runXds(xdsClient2,XdsTypeUrl.CDS);
-        XdsClient xdsClient3 = new XdsClient(channel);
-        XdsReader.runXds(xdsClient3,XdsTypeUrl.EDS);
-// xdsClient당 한개의 요청이네
 
         while(true) {
 

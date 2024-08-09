@@ -11,7 +11,9 @@ import io.grpc.stub.StreamObserver;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -34,6 +36,7 @@ public class XdsClient {
      */
     private final Map<Long, StreamObserver<DiscoveryRequest>> requestObserverMap = new ConcurrentHashMap<>();
     private final Map<Long, StreamObserver<DiscoveryResponse>> responseObserverMap = new ConcurrentHashMap<>();
+    private Map<String, State> stateMap = new ConcurrentHashMap<>();
     private DiscoveryResponse responsed;
 
 
@@ -67,28 +70,8 @@ public class XdsClient {
                 .setNode(node)
                 .build();
     }
-    public class _State {
-        StreamObserver<DiscoveryRequest> streamObserverRequest;
-        StreamObserver<DiscoveryResponse> streamObserverResponse;
-        DiscoveryRequest request;
-        DiscoveryResponse response;
 
-        public _State () {
-
-        }
-
-        public _State(StreamObserver<DiscoveryRequest> streamObserverRequest,StreamObserver<DiscoveryResponse> streamObserverResponse, DiscoveryRequest request) {
-            this.streamObserverRequest = streamObserverRequest;
-            this.streamObserverResponse = streamObserverResponse;
-            this.request = request;
-        }
-
-        public void setResponse(DiscoveryResponse response) {
-            this.response = response;
-        }
-    }
-
-    public _State sendDiscoveryRequest(String typeUrl) {
+    public State sendDiscoveryRequest(String typeUrl) {
         DiscoveryRequest request = buildDiscoveryRequest(typeUrl, Collections.emptySet());
 
         StreamObserver<DiscoveryResponse> responseObserver = new StreamObserver<DiscoveryResponse>() {
@@ -116,10 +99,9 @@ public class XdsClient {
 
         StreamObserver<DiscoveryRequest> requestStreamObserver = stub.streamAggregatedResources(responseObserver);
         requestStreamObserver.onNext(request);
-        requestObserverMap.put(1L,requestStreamObserver);
-        responseObserverMap.put(1L,responseObserver);
-
-        return new _State(requestStreamObserver, responseObserver,request);
+        State state = new State(typeUrl,requestStreamObserver,responseObserver, request);
+        stateMap.put(typeUrl,state);    // typeUrl -> Xds Url + xDS's resource Name. BUT typeURL을 쓰는 sendAck때문에 고민이 필요할 것.
+        return state;
     }
 
 
@@ -162,10 +144,39 @@ public class XdsClient {
                 .setResponseNonce(response.getNonce())
                 .setTypeUrl(response.getTypeUrl())
                 .build();
-        System.out.println("SEND ACK, ack : " + ack);
-        requestObserverMap.get(1L).onNext(ack);
+        System.out.println("SEND ACK, Type URL :" + ack.getTypeUrl() + ", version : " + ack.getVersionInfo() + ", Nonce : " + ack.getResponseNonce());
+        stateMap.get(response.getTypeUrl()).getStreamObserverRequest().onNext(ack);
+    }
 
 
+    public void runXds (XdsTypeUrl xdsTypeUrl) {
+        Callable<Integer> task = () -> {
+
+            listenXds(this,xdsTypeUrl);
+            return 0;
+        };
+        FutureTask<Integer> future = new FutureTask<>(task);
+        new Thread(future).start();
+    }
+    public void listenXds(XdsClient xdsClient, XdsTypeUrl xdsTypeUrl) throws InterruptedException {
+        // start
+
+
+        String typeUrl = xdsTypeUrl.getTypeUrl();  // EDS
+
+        State state = xdsClient.sendDiscoveryRequest(typeUrl);
+        StreamObserver<DiscoveryRequest> requestStreamObserverXds = state.getStreamObserverRequest();
+
+
+        while(true) {
+            Thread.sleep(5000);
+            state.getStreamObserverRequest().onNext(state.getRequest());
+        }
+        // connection이 일부가 깨지거나
+        // server에 connection이 모두 깨질 때
+        // 그에 대한 처리 방안이 필요하다.
+
+        // end
     }
 }
 

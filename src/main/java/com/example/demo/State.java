@@ -6,38 +6,34 @@ import io.grpc.stub.StreamObserver;
 
 
 public class State {
-    String keyName;
-    StreamObserver<DiscoveryRequest> streamObserverRequest;
-    StreamObserver<DiscoveryResponse> streamObserverResponse;
-    DiscoveryRequest request;
-    DiscoveryResponse response;
+    private StreamObserver<DiscoveryRequest> streamObserverRequest;
+    private StreamObserver<DiscoveryResponse> streamObserverResponse;
+    private DiscoveryRequest request;
+    private String typeUrl;
 
     public State () {
     }
 
-    public State(StreamObserver<DiscoveryRequest> streamObserverRequest,StreamObserver<DiscoveryResponse> streamObserverResponse, DiscoveryRequest request) {
+    public State(String typeUrl, StreamObserver<DiscoveryRequest> streamObserverRequest,StreamObserver<DiscoveryResponse> streamObserverResponse, DiscoveryRequest request) {
+        this.typeUrl = typeUrl;
         this.streamObserverRequest = streamObserverRequest;
         this.streamObserverResponse = streamObserverResponse;
         this.request = request;
     }
 
-    public void setKeyName(String keyName) {
-        this.keyName = keyName;
+    public DiscoveryRequest getRequest() {
+        return request;
     }
 
-    public void setResponse(DiscoveryResponse response) {
-        this.response = response;
+    public StreamObserver<DiscoveryRequest> getStreamObserverRequest() {
+        return streamObserverRequest;
     }
 
-    public void setRequest(DiscoveryRequest request) {
-        this.request = request;
+    public StreamObserver<DiscoveryResponse> getStreamObserverResponse() {
+        return streamObserverResponse;
     }
 
-    public void setStreamObserverRequest(StreamObserver<DiscoveryRequest> streamObserverRequest) {
-        this.streamObserverRequest = streamObserverRequest;
-    }
-
-    public void setStreamObserverResponse(StreamObserver<DiscoveryResponse> streamObserverResponse) {
-        this.streamObserverResponse = streamObserverResponse;
+    public String getTypeUrl() {
+        return typeUrl;
     }
 }
