@@ -26,7 +26,7 @@ public class XdsClient {
         XdsClient xdsClient = new XdsClient(ManagedChannelBuilder.forAddress("localhost", 9002) // 실제 서버 주소와 포트
                 .usePlaintext()
                 .build());
-        State state = xdsClient.sendDiscoveryRequest(XdsTypeUrl.CDS.getTypeUrl());
+        State state = xdsClient.sendDiscoveryRequest(XdsTypeUrl.CDS.getTypeUrl(), null);
         StreamObserver<DiscoveryRequest> requestStreamObserverCDS = state.getStreamObserverRequest();
 
         state.getStreamObserverRequest().onNext(state.getRequest());
@@ -89,8 +89,15 @@ public class XdsClient {
                 .build();
     }
 
-    public State sendDiscoveryRequest(String typeUrl) {
-        DiscoveryRequest request = buildDiscoveryRequest(typeUrl, Collections.emptySet());
+    public State sendDiscoveryRequest(String typeUrl, Set<String> stringSet) {
+        DiscoveryRequest request = null;
+
+        if (stringSet == null) {
+            request = buildDiscoveryRequest(typeUrl, Collections.emptySet());
+        }
+        else {
+            request = buildDiscoveryRequest(typeUrl, stringSet);
+        }
 
         StreamObserver<DiscoveryResponse> responseObserver = new StreamObserver<DiscoveryResponse>() {
             @Override
@@ -182,7 +189,7 @@ public class XdsClient {
 
         String typeUrl = xdsTypeUrl.getTypeUrl();  // EDS
 
-        State state = xdsClient.sendDiscoveryRequest(typeUrl);
+        State state = xdsClient.sendDiscoveryRequest(typeUrl, null);
         StreamObserver<DiscoveryRequest> requestStreamObserverXds = state.getStreamObserverRequest();
 
 

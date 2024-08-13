@@ -58,7 +58,7 @@ public class XdsClientTest {
 
         String typeUrl = XdsTypeUrl.EDS.getTypeUrl();  // EDS
 
-        State state = xdsClient.sendDiscoveryRequest(XdsTypeUrl.CDS.getTypeUrl());
+        State state = xdsClient.sendDiscoveryRequest(XdsTypeUrl.CDS.getTypeUrl(), null);
          StreamObserver<DiscoveryRequest> requestStreamObserverCDS = state.getStreamObserverRequest();
 
         state.getStreamObserverRequest().onNext(state.getRequest());
