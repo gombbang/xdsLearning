@@ -40,6 +40,14 @@ public class CdsDecoder implements XdsDecoder {
                         Set<String> stringSet = new HashSet<>();
                         stringSet.add(cluster.getName());
                         State state = xdsClient.sendDiscoveryRequest(XdsTypeUrl.EDS.getTypeUrl(), stringSet);
+                    } else {
+                        System.out.println("CLUSTER");
+                        System.out.println("CLUSTER");
+                        System.out.println("CLUSTER");
+                        System.out.println("CLUSTER");
+                        System.out.println("CLUSTER");
+                        System.out.println("CLUSTER");
+                        // 다른 cluster 정보를 받아오는지 테스트.
                     }
                 }
             }

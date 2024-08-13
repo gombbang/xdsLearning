@@ -9,6 +9,7 @@ import io.envoyproxy.envoy.service.discovery.v3.DiscoveryResponse;
 import io.grpc.stub.StreamObserver;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -26,7 +27,9 @@ public class XdsClient {
         XdsClient xdsClient = new XdsClient(ManagedChannelBuilder.forAddress("localhost", 9002) // 실제 서버 주소와 포트
                 .usePlaintext()
                 .build());
-        State state = xdsClient.sendDiscoveryRequest(XdsTypeUrl.CDS.getTypeUrl(), null);
+        Set<String> stringSet = new HashSet<>();
+        stringSet.add("echo");
+        State state = xdsClient.sendDiscoveryRequest(XdsTypeUrl.CDS.getTypeUrl(), stringSet);
         StreamObserver<DiscoveryRequest> requestStreamObserverCDS = state.getStreamObserverRequest();
 
         state.getStreamObserverRequest().onNext(state.getRequest());
