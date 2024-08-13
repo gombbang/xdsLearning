@@ -61,11 +61,11 @@ public class XdsClientTest {
         State state = xdsClient.sendDiscoveryRequest(XdsTypeUrl.CDS.getTypeUrl());
          StreamObserver<DiscoveryRequest> requestStreamObserverCDS = state.getStreamObserverRequest();
 
+        state.getStreamObserverRequest().onNext(state.getRequest());
 
         while(true) {
-            Thread.sleep(5000);
+            Thread.sleep(999999999);
             System.out.println("Test");
-             state.getStreamObserverRequest().onNext(state.getRequest());
         }
         // connection이 일부가 깨지거나
         // server에 connection이 모두 깨질 때
@@ -85,9 +85,9 @@ public class XdsClientTest {
         xdsClient.runXds(XdsTypeUrl.CDS);
         xdsClient.runXds(XdsTypeUrl.EDS);
 
-
         while(true) {
-
+            Thread.sleep(999999999);
+            System.out.println("Test");
         }
     }
 }

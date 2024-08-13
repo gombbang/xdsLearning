@@ -18,6 +18,24 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class XdsClient {
+
+    public static void main(String[] args) throws InterruptedException {
+
+
+        String typeUrl = XdsTypeUrl.EDS.getTypeUrl();  // EDS
+        XdsClient xdsClient = new XdsClient(ManagedChannelBuilder.forAddress("localhost", 9002) // 실제 서버 주소와 포트
+                .usePlaintext()
+                .build());
+        State state = xdsClient.sendDiscoveryRequest(XdsTypeUrl.CDS.getTypeUrl());
+        StreamObserver<DiscoveryRequest> requestStreamObserverCDS = state.getStreamObserverRequest();
+
+        state.getStreamObserverRequest().onNext(state.getRequest());
+
+        while(true) {
+            Thread.sleep(5000000);
+            System.out.println("Test");
+        }
+    }
     private final ManagedChannel channel;
     private final AggregatedDiscoveryServiceGrpc.AggregatedDiscoveryServiceStub stub;
 
@@ -168,10 +186,10 @@ public class XdsClient {
         StreamObserver<DiscoveryRequest> requestStreamObserverXds = state.getStreamObserverRequest();
 
 
-        while(true) {
-            Thread.sleep(5000);
-            state.getStreamObserverRequest().onNext(state.getRequest());
-        }
+//        while(true) {
+//            Thread.sleep(5000);
+//            state.getStreamObserverRequest().onNext(state.getRequest());
+//        }
         // connection이 일부가 깨지거나
         // server에 connection이 모두 깨질 때
         // 그에 대한 처리 방안이 필요하다.
