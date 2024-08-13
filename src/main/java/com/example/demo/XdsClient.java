@@ -32,7 +32,7 @@ public class XdsClient {
         State state = xdsClient.sendDiscoveryRequest(XdsTypeUrl.CDS.getTypeUrl(), stringSet);
         StreamObserver<DiscoveryRequest> requestStreamObserverCDS = state.getStreamObserverRequest();
 
-        state.getStreamObserverRequest().onNext(state.getRequest());
+        // state.getStreamObserverRequest().onNext(state.getRequest());
 
         while(true) {
             Thread.sleep(5000000);
@@ -42,21 +42,6 @@ public class XdsClient {
     private final ManagedChannel channel;
     private final AggregatedDiscoveryServiceGrpc.AggregatedDiscoveryServiceStub stub;
 
-
-
-    protected final static AtomicLong requestId = new AtomicLong(0);
-    /**
-     * Store Request Parameter ( resourceNames )
-     * K - requestId, V - resourceNames
-     */
-    protected final Map<Long, Set<String>> requestParam = new ConcurrentHashMap<>();
-
-    /**
-     * Store ADS Request Observer ( StreamObserver in Streaming Request )
-     * K - requestId, V - StreamObserver
-     */
-    private final Map<Long, StreamObserver<DiscoveryRequest>> requestObserverMap = new ConcurrentHashMap<>();
-    private final Map<Long, StreamObserver<DiscoveryResponse>> responseObserverMap = new ConcurrentHashMap<>();
     private Map<String, State> stateMap = new ConcurrentHashMap<>();
     private DiscoveryResponse responsed;
 
